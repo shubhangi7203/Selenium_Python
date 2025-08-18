@@ -1,23 +1,15 @@
 import pytest
-import glob
+import os
 
-# Collect all Python test files in current directory
-# (excluding this runner file itself)
-files = [f for f in glob.glob("*.py") if f != "run_all_tests.py"]
+# Reports folder inside Jenkins workspace
+report_dir = os.path.join(os.getcwd(), "reports")
+os.makedirs(report_dir, exist_ok=True)
 
-print("\n================ Running Tests with Pytest ================\n")
-print(f"Discovered test files: {files}\n")
+exit_code = pytest.main([
+    "My_Selenium_Program/com/qa/testscripts",   # Run all tests in this folder
+    f"--junitxml={os.path.join(report_dir, 'result.xml')}",
+    f"--html={os.path.join(report_dir, 'report.html')}",
+    "--self-contained-html"
+])
 
-pytest_args = files + [
-    "--junitxml=../../../../result.xml",   # JUnit report (for Jenkins Test Result Trend)
-    "--html=../../../../report.html",      # HTML report (human-readable)
-    "--self-contained-html"                # Embed CSS/JS inside HTML
-]
-
-# Run pytest with the given arguments
-exit_code = pytest.main(pytest_args)
-
-print("\n================ Test Execution Completed ================\n")
-
-# Exit with pytest's return code (important for Jenkins build status)
 exit(exit_code)
