@@ -1,18 +1,23 @@
-import os
+import pytest
 import glob
 
-# Get all .py files from current directory (excluding run_all_tests.py)
+# Collect all Python test files in current directory
+# (excluding this runner file itself)
 files = [f for f in glob.glob("*.py") if f != "run_all_tests.py"]
 
-pytest_args = [
-    files,                            # Run all .py files in this folder
-    "--junitxml=../../../../result.xml",    # Save JUnit report (for Jenkins Test Result Trend)
-    "--html=../../../../report.html",       # Save HTML report
-    "--self-contained-html"                 # Make HTML report standalone (no external CSS/JS)
+print("\n================ Running Tests with Pytest ================\n")
+print(f"Discovered test files: {files}\n")
+
+pytest_args = files + [
+    "--junitxml=../../../../result.xml",   # JUnit report (for Jenkins Test Result Trend)
+    "--html=../../../../report.html",      # HTML report (human-readable)
+    "--self-contained-html"                # Embed CSS/JS inside HTML
 ]
 
-print(f"Running the following files:\n{files}\n")
+# Run pytest with the given arguments
+exit_code = pytest.main(pytest_args)
 
-for file in files:
-    print(f"\n=== Running {file} ===")
-    os.system(f"python {file}")
+print("\n================ Test Execution Completed ================\n")
+
+# Exit with pytest's return code (important for Jenkins build status)
+exit(exit_code)
